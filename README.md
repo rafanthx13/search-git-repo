@@ -4,6 +4,8 @@ Projeto Web para buscar repositórios públicos do github, buscando pelo nome do
 
 ## comando para subir a página web
 
+Execute o seguinte comando logo apos `npm run build`
+
 ```sh
 git subtree push --prefix dist origin gh-pages
 ```

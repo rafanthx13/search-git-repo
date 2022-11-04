@@ -71,7 +71,8 @@
     <!-- ERROR SECTION -->
     <template v-else-if="this.error">
       <div class="error-message">
-        <span>Erro ao buscar os dados</span>  
+        <p>Erro ao buscar os dados.</p>
+        <p>O nome do usuário não foi encontrado</p>
       </div>
     </template>
 
@@ -89,11 +90,12 @@ export default {
       items: [],
       original_items: [],
       type_repos: '',
+      sort_repos: '',
       text: '',
       github_user: '',
       render: false,
       error: false,
-      sort_repos: '',
+      
       options_type_repos: [
           { item: 'public', name: 'Públicos' },
           { item: 'archived', name: 'Arquivados' },
@@ -115,16 +117,6 @@ export default {
       }
     },
 
-    text(new_text, old_text){
-      if(new_text == ''){
-        this.items = this.original_items.slice()
-      }else {
-        this.items = this.original_items.filter(
-          el => el['full_name'].includes(new_text))  
-      }
-      
-    },
-
     sort_repos(new_sort_repo, old_sort_repo) {
       if(new_sort_repo == 'alphabetic'){
         this.items = this.items.sort(
@@ -132,6 +124,28 @@ export default {
       } else {
         this.items = this.items.sort(
          (a,b) => this.compare_by_attr(a, b, 'last_commit') ).reverse()
+      }
+    },
+
+    text(new_text, old_text) {
+      if(new_text == ''){
+        this.items = this.original_items.slice()
+      }else {
+        this.items = this.original_items.filter(
+          el => el['full_name'].includes(new_text)
+        )
+      }
+      // Caso reiniciar ou pesquisar algo enquanto as opções estão ativadas
+      if(this.sort_repos == 'last_commit') {
+        this.items = this.items.sort(
+          (a,b) => this.compare_by_attr(a, b, 'last_commit') 
+        ).reverse()
+      }
+      if(this.type_repos == 'archived'){
+        this.items = this.original_items.filter(el => el['archived'] == true)  
+      }
+      if(this.type_repos == 'public'){
+        this.items = this.original_items.filter(el => el['archived'] == false)  
       }
 
     },
@@ -151,6 +165,8 @@ export default {
 
     async buscar_repositorio(usuario_github){
       try {
+        this.type_repos = ''
+        this.sort_repos = ''
         let url = `https://api.github.com/users/${usuario_github}/repos?per_page=1000`
         const res = await axios.get(url);
         this.items = res.data.map(x => ({ 
@@ -201,7 +217,7 @@ export default {
 
 .error-message {
   text-align: center;
-    font-size: xx-large;
+    font-size: larger;
     color: red;
 }
 
